@@ -26,7 +26,10 @@ import twitter4j.internal.org.json.JSONObject;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 import static twitter4j.internal.json.z_T4JInternalParseUtil.*;
 
@@ -35,16 +38,19 @@ import static twitter4j.internal.json.z_T4JInternalParseUtil.*;
  *
  * @author Yusuke Yamamoto - yusuke at mac.com
  */
-/*package*/ final class QueryResultJSONImpl implements QueryResult, java.io.Serializable {
+/*package*/ final class QueryResultJSONImpl extends ArrayList<Status> implements QueryResult, java.io.Serializable {
 
     private static final long serialVersionUID = -6781654399437121238L;
+    
+    private transient RateLimitStatus rateLimitStatus = null;
+    private transient int accessLevel;
+    
     private long sinceId;
     private long maxId;
     private String refreshUrl;
     private int count;
     private double completedIn;
     private String query;
-    private List<Status> tweets;
     private String nextResults;
 
     // private static factory method to instantiate Query class with "next_page"
@@ -66,6 +72,9 @@ import static twitter4j.internal.json.z_T4JInternalParseUtil.*;
     }
 
     /*package*/ QueryResultJSONImpl(HttpResponse res, Configuration conf) throws TwitterException {
+        super();
+        this.rateLimitStatus = RateLimitStatusJSONImpl.createFromResponseHeader(res);
+        this.accessLevel = z_T4JInternalParseUtil.toAccessLevel(res);
         JSONObject json = res.asJSONObject();
         try {
             JSONObject searchMetaData = json.getJSONObject("search_metadata");
@@ -78,13 +87,12 @@ import static twitter4j.internal.json.z_T4JInternalParseUtil.*;
             sinceId = getLong("since_id", searchMetaData);
 
             JSONArray array = json.getJSONArray("statuses");
-            tweets = new ArrayList<Status>(array.length());
             if (conf.isJSONStoreEnabled()) {
                 DataObjectFactoryUtil.clearThreadLocalMap();
             }
             for (int i = 0; i < array.length(); i++) {
                 JSONObject tweet = array.getJSONObject(i);
-                tweets.add(new StatusJSONImpl(tweet, conf));
+                add(new StatusJSONImpl(tweet, conf));
             }
         } catch (JSONException jsone) {
             throw new TwitterException(jsone.getMessage() + ":" + json.toString(), jsone);
@@ -95,7 +103,6 @@ import static twitter4j.internal.json.z_T4JInternalParseUtil.*;
         super();
         sinceId = query.getSinceId();
         count = query.getCount();
-        tweets = new ArrayList<Status>(0);
     }
 
     /**
@@ -156,7 +163,7 @@ import static twitter4j.internal.json.z_T4JInternalParseUtil.*;
      */
     @Override
     public List<Status> getTweets() {
-        return tweets;
+        return this;
     }
 
     /**
@@ -199,10 +206,7 @@ import static twitter4j.internal.json.z_T4JInternalParseUtil.*;
         if (!query.equals(that.getQuery())) return false;
         if (refreshUrl != null ? !refreshUrl.equals(that.getRefreshUrl()) : that.getRefreshUrl() != null)
             return false;
-        if (tweets != null ? !tweets.equals(that.getTweets()) : that.getTweets() != null)
-            return false;
-
-        return true;
+        return super.equals(o);
     }
 
     @Override
@@ -216,7 +220,7 @@ import static twitter4j.internal.json.z_T4JInternalParseUtil.*;
         temp = completedIn != +0.0d ? Double.doubleToLongBits(completedIn) : 0L;
         result = 31 * result + (int) (temp ^ (temp >>> 32));
         result = 31 * result + query.hashCode();
-        result = 31 * result + (tweets != null ? tweets.hashCode() : 0);
+        result = 31 * result + super.hashCode();
         return result;
     }
 
@@ -229,7 +233,18 @@ import static twitter4j.internal.json.z_T4JInternalParseUtil.*;
                 ", count=" + count +
                 ", completedIn=" + completedIn +
                 ", query='" + query + '\'' +
-                ", tweets=" + tweets +
+                ", tweets=" + super.toString() +
                 '}';
+    }
+   
+
+    @Override
+    public RateLimitStatus getRateLimitStatus() {
+        return rateLimitStatus;
+    }
+
+    @Override
+    public int getAccessLevel() {
+        return accessLevel;
     }
 }

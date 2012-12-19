@@ -16,9 +16,12 @@
 
 package twitter4j.internal.json;
 
+import java.util.Collection;
+import java.util.Iterator;
 import twitter4j.*;
 
 import java.util.List;
+import java.util.ListIterator;
 
 /**
  * A data class representing search API response
@@ -115,5 +118,130 @@ final class LazyQueryResult implements twitter4j.QueryResult {
         return "LazyQueryResult{" +
                 "target=" + getTarget() +
                 "}";
+    }
+
+    @Override
+    public RateLimitStatus getRateLimitStatus() {
+        return getTarget().getRateLimitStatus();
+    }
+
+    @Override
+    public int getAccessLevel() {
+        return getTarget().getAccessLevel();
+    }
+
+    @Override
+    public int size() {
+        return getTarget().size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return getTarget().isEmpty();
+    }
+
+    @Override
+    public boolean contains(Object o) {
+        return getTarget().contains(o);
+    }
+
+    @Override
+    public Iterator<Status> iterator() {
+        return getTarget().iterator();
+    }
+
+    @Override
+    public Object[] toArray() {
+        return getTarget().toArray();
+    }
+
+    @Override
+    public <T> T[] toArray(T[] ts) {
+        return getTarget().toArray(ts);
+    }
+
+    @Override
+    public boolean add(Status e) {
+        return getTarget().add(e);
+    }
+
+    @Override
+    public boolean remove(Object o) {
+        return getTarget().remove(o);
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> coll) {
+        return getTarget().containsAll(coll);
+    }
+
+    @Override
+    public boolean addAll(Collection<? extends Status> coll) {
+        return getTarget().addAll(coll);
+    }
+
+    @Override
+    public boolean addAll(int i, Collection<? extends Status> coll) {
+        return getTarget().addAll(i, coll);
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> coll) {
+        return getTarget().removeAll(coll);
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> coll) {
+        return getTarget().retainAll(coll);
+    }
+
+    @Override
+    public void clear() {
+        getTarget().clear();
+    }
+
+    @Override
+    public Status get(int i) {
+        return getTarget().get(i);
+    }
+
+    @Override
+    public Status set(int i, Status e) {
+        return getTarget().set(i, e);
+    }
+
+    @Override
+    public void add(int i, Status e) {
+        getTarget().add(i, e);
+    }
+
+    @Override
+    public Status remove(int i) {
+        return getTarget().remove(i);
+    }
+
+    @Override
+    public int indexOf(Object o) {
+        return getTarget().indexOf(o);
+    }
+
+    @Override
+    public int lastIndexOf(Object o) {
+        return getTarget().lastIndexOf(o);
+    }
+
+    @Override
+    public ListIterator<Status> listIterator() {
+        return getTarget().listIterator();
+    }
+
+    @Override
+    public ListIterator<Status> listIterator(int i) {
+        return getTarget().listIterator(i);
+    }
+
+    @Override
+    public List<Status> subList(int a, int b) {
+        return getTarget().subList(a, b);
     }
 }
